@@ -2,29 +2,20 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
 $rawInput = file_get_contents("php://input");
-file_put_contents("debug_add_comment.txt", $rawInput);
-
 $data = json_decode($rawInput, true);
-if (!$data) {
-    echo json_encode(['success' => false, 'message' => 'Invalid JSON input', 'raw_input' => $rawInput]);
-    exit;
-}
 
-if (
-    !isset($data['post_id']) ||
-    !isset($data['user_id']) ||
-    !isset($data['comment_text'])
-) {
-    echo json_encode(['success' => false, 'message' => 'Missing parameters', 'raw_input' => $rawInput]);
+if (!isset($data['post_id'], $data['user_id'], $data['comment_text'], $data['username'])) {
+    echo json_encode(['success' => false, 'message' => 'Missing parameters']);
     exit;
 }
 
 $post_id = intval($data['post_id']);
 $user_id = intval($data['user_id']);
+$username = $data['username'];
 $comment_text = trim($data['comment_text']);
 
 if ($comment_text === "") {
@@ -32,31 +23,39 @@ if ($comment_text === "") {
     exit;
 }
 
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "prompt_ai";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+$conn = new mysqli("localhost", "root", "", "prompt_ai");
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'DB connection failed: '.$conn->connect_error]);
+    echo json_encode(['success' => false, 'message' => 'DB connection failed']);
     exit;
 }
 
+// Get post owner
+$stmtOwner = $conn->prepare("SELECT user_id FROM posts WHERE post_id = ?");
+$stmtOwner->bind_param("i", $post_id);
+$stmtOwner->execute();
+$stmtOwner->bind_result($owner_id);
+$stmtOwner->fetch();
+$stmtOwner->close();
+
+// Insert comment
 $stmt = $conn->prepare("INSERT INTO comments (post_id, user_id, comment_text) VALUES (?, ?, ?)");
-if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'Prepare failed: '.$conn->error]);
-    exit;
-}
-
 $stmt->bind_param("iis", $post_id, $user_id, $comment_text);
 
-if (!$stmt->execute()) {
-    echo json_encode(['success' => false, 'message' => 'Execute failed: '.$stmt->error]);
-    exit;
+if ($stmt->execute()) {
+    // Add notification
+    if ($owner_id && $owner_id != $user_id) {
+        $notif = $conn->prepare("INSERT INTO notifications (user_id, sender_id, post_id, message) VALUES (?, ?, ?, ?)");
+        $message = "$username commented on your post";
+        $notif->bind_param("iiis", $owner_id, $user_id, $post_id, $message);
+        $notif->execute();
+        $notif->close();
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Comment added']);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Execute failed: ' . $stmt->error]);
 }
 
-echo json_encode(['success' => true, 'message' => 'Comment added']);
 $stmt->close();
 $conn->close();
 ?>
