@@ -13,60 +13,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Validate fields
-if (!isset($_POST['message']) || !isset($_POST['user_id']) || !isset($_FILES['image'])) {
-    echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+// ...
+
+if (!isset($_POST['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Missing user_id']);
     exit;
 }
 
-$message = trim($_POST['message']);
+$message = trim($_POST['message'] ?? '');
 $user_id = intval($_POST['user_id']);
 
-// Validate image
-if ($_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['success' => false, 'message' => 'File upload error']);
-    exit;
+$uploadedFilenames = [];
+
+// Only process images if provided
+if (!empty($_FILES['image']['name'][0])) {
+    $uploadDir = __DIR__ . '/uploads/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    foreach ($_FILES['image']['name'] as $i => $name) {
+        if ($_FILES['image']['error'][$i] === UPLOAD_ERR_OK) {
+            $ext = pathinfo($name, PATHINFO_EXTENSION);
+            $filename = uniqid('post_', true) . '.' . $ext;
+            $filepath = $uploadDir . $filename;
+
+            if (move_uploaded_file($_FILES['image']['tmp_name'][$i], $filepath)) {
+                $uploadedFilenames[] = $filename;
+            }
+        }
+    }
 }
 
-// Create uploads dir if needed
-$uploadDir = __DIR__ . '/uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
-}
+$imageJson = json_encode($uploadedFilenames); // Store as JSON string
 
-// Generate unique filename
-$ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-$filename = uniqid('post_', true) . '.' . $ext;
-$filepath = $uploadDir . $filename;
-
-if (!move_uploaded_file($_FILES['image']['tmp_name'], $filepath)) {
-    echo json_encode(['success' => false, 'message' => 'Failed to save file']);
-    exit;
-}
-
-// Save to database
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "prompt_ai";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+$conn = new mysqli("localhost", "root", "", "prompt_ai");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed: ' . $conn->connect_error]);
     exit;
 }
 
 $stmt = $conn->prepare("INSERT INTO posts (user_id, message, image) VALUES (?, ?, ?)");
-if (!$stmt) {
-    echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . $conn->error]);
-    $conn->close();
-    exit;
-}
-
-$stmt->bind_param("iss", $user_id, $message, $filename);
+$stmt->bind_param("iss", $user_id, $message, $imageJson);
 
 if ($stmt->execute()) {
-    echo json_encode(['success' => true, 'message' => 'Post saved successfully', 'filename' => $filename]);
+    echo json_encode(['success' => true, 'message' => 'Post saved', 'filenames' => $uploadedFilenames]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Insert failed: ' . $stmt->error]);
 }
@@ -74,4 +65,5 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 exit;
+
 ?>
