@@ -29,14 +29,25 @@ if (!$result) {
 $posts = [];
 
 while ($row = $result->fetch_assoc()) {
+    $images = json_decode($row['image'], true); // decode JSON to array
+
+    if (!is_array($images)) {
+        // If empty string or invalid JSON, fallback to empty array
+        $images = [];
+    }
+
+    // Filter out any empty values and prefix URLs
+    $fullImageUrls = array_map(function($img) {
+        return 'http://localhost/AI/uploads/' . $img;
+    }, array_filter($images, fn($img) => !empty($img)));
+
     $posts[] = [
-        'post_id' => $row['post_id'],
+        'post_id' => intval($row['post_id']),
         'prompt' => $row['message'],
-        'image' => 'http://localhost/AI/uploads/' . $row['image']
+        'image' => $fullImageUrls
     ];
 }
 
 echo json_encode(['success' => true, 'posts' => $posts]);
 
 $conn->close();
-?>
