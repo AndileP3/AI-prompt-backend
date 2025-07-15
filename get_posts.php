@@ -33,7 +33,7 @@ while ($row = $result->fetch_assoc()) {
 
     // Filter out any empty values and prefix URLs
     $fullImageUrls = array_map(function($img) {
-        return 'https://keailand.ct.ws/uploads/' . $img;
+        return 'http://localhost/AI//uploads/' . $img;
     }, array_filter($images, fn($img) => !empty($img)));
 
     $posts[] = [

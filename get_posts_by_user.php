@@ -48,7 +48,7 @@ while ($row = $result->fetch_assoc()) {
     $posts[] = [
         'post_id' => $row['post_id'],
         'prompt' => $row['message'],
-        'image' => 'https://keailand.ct.ws/uploads/' . $row['image']
+        'image' => 'http://localhost/AI/uploads/' . $row['image']
     ];
 }
 

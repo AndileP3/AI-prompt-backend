@@ -40,7 +40,7 @@ if ($row = $result->fetch_assoc()) {
     if (!is_array($images)) $images = [];
 
     // Prefix full image URLs
-    $images = array_map(fn($img) => "https://keailand.ct.ws/uploads/" . $img, $images);
+    $images = array_map(fn($img) => "http://localhost/AI/uploads/" . $img, $images);
 
     echo json_encode([
         'success' => true,

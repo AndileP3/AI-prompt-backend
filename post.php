@@ -14,8 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// ...
-
 if (!isset($_POST['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Missing user_id']);
     exit;
@@ -46,13 +44,27 @@ if (!empty($_FILES['image']['name'][0])) {
     }
 }
 
-$imageJson = json_encode($uploadedFilenames); // Store as JSON string
+$imageJson = json_encode($uploadedFilenames);
 
+// Check DB connection
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed: ' . $conn->connect_error]);
     exit;
 }
 
+// ✅ Validate user_id exists
+$check = $conn->prepare("SELECT user_id FROM users WHERE user_id = ?");
+$check->bind_param("i", $user_id);
+$check->execute();
+$check->store_result();
+
+if ($check->num_rows === 0) {
+    echo json_encode(['success' => false, 'message' => 'Invalid user_id. User does not exist.']);
+    exit;
+}
+$check->close();
+
+// Insert post
 $stmt = $conn->prepare("INSERT INTO posts (user_id, message, image) VALUES (?, ?, ?)");
 $stmt->bind_param("iss", $user_id, $message, $imageJson);
 
@@ -65,5 +77,4 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 exit;
-
 ?>
