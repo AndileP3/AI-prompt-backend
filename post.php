@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -47,7 +48,6 @@ if (!empty($_FILES['image']['name'][0])) {
 
 $imageJson = json_encode($uploadedFilenames); // Store as JSON string
 
-$conn = new mysqli("localhost", "root", "", "prompt_ai");
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed: ' . $conn->connect_error]);
     exit;

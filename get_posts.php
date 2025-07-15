@@ -1,16 +1,11 @@
 <?php
+include 'conn.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "prompt_ai";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
@@ -38,7 +33,7 @@ while ($row = $result->fetch_assoc()) {
 
     // Filter out any empty values and prefix URLs
     $fullImageUrls = array_map(function($img) {
-        return 'http://localhost/AI/uploads/' . $img;
+        return 'https://keailand.ct.ws/uploads/' . $img;
     }, array_filter($images, fn($img) => !empty($img)));
 
     $posts[] = [

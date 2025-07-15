@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -35,12 +36,7 @@ if (!$data) {
     } else {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        $servername = "localhost";
-        $dbusername = "root";
-        $dbpassword = "";
-        $dbname = "prompt_ai";
-
-        $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
+  
         if ($conn->connect_error) {
             $response = ['success' => false, 'message' => 'DB connection failed: ' . $conn->connect_error];
         } else {

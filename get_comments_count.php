@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
@@ -9,12 +10,6 @@ if (!isset($_GET["post_id"])) {
 
 $post_id = intval($_GET["post_id"]);
 
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "prompt_ai";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "DB error"]);
     exit;

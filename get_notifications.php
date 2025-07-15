@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
@@ -8,7 +9,6 @@ if (!isset($_GET['user_id'])) {
 }
 
 $user_id = intval($_GET['user_id']);
-$conn = new mysqli("localhost", "root", "", "prompt_ai");
 
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed']);

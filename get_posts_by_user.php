@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -6,12 +7,6 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
 // Database connection
-$servername = "localhost";
-$dbusername = "root";
-$dbpassword = "";
-$dbname = "prompt_ai";
-
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
@@ -53,7 +48,7 @@ while ($row = $result->fetch_assoc()) {
     $posts[] = [
         'post_id' => $row['post_id'],
         'prompt' => $row['message'],
-        'image' => 'http://localhost/AI/uploads/' . $row['image']
+        'image' => 'https://keailand.ct.ws/uploads/' . $row['image']
     ];
 }
 

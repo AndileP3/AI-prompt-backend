@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
@@ -9,7 +10,6 @@ if (!isset($_GET['post_id'])) {
 
 $postId = intval($_GET['post_id']);
 
-$conn = new mysqli("localhost", "root", "", "prompt_ai");
 
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed']);
@@ -40,7 +40,7 @@ if ($row = $result->fetch_assoc()) {
     if (!is_array($images)) $images = [];
 
     // Prefix full image URLs
-    $images = array_map(fn($img) => "http://localhost/AI/uploads/" . $img, $images);
+    $images = array_map(fn($img) => "https://keailand.ct.ws/uploads/" . $img, $images);
 
     echo json_encode([
         'success' => true,

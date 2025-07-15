@@ -1,4 +1,5 @@
 <?php
+include 'conn.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Access-Control-Allow-Origin: *");
@@ -13,7 +14,7 @@ $post_id = intval($_POST['post_id']);
 $user_id = intval($_POST['user_id']);
 $username = $_POST['username'];
 
-$conn = new mysqli("localhost", "root", "", "prompt_ai");
+
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed']);
     exit;

@@ -1,4 +1,6 @@
 <?php
+include 'conn.php';
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Access-Control-Allow-Origin: *");
@@ -23,7 +25,7 @@ if ($comment_text === "") {
     exit;
 }
 
-$conn = new mysqli("localhost", "root", "", "prompt_ai");
+
 if ($conn->connect_error) {
     echo json_encode(['success' => false, 'message' => 'DB connection failed']);
     exit;
