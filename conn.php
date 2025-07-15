@@ -1,8 +1,8 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "prompt_ai";
+$servername = "216.126.194.27";
+$username = "bluenrol_andile";
+$password = "mamogobalale@2001";
+$dbname = "bluenrol_prompt_ai";
 $port = 3306;
 
 // Create connection
