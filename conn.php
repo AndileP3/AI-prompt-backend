@@ -12,3 +12,9 @@ $conn = new mysqli($servername, $username, $password, $dbname, $port);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+// Set MySQL timezone to South African Time (UTC+2)
+if (!$conn->query("SET time_zone = '+02:00'")) {
+    die("Error setting time zone: " . $conn->error);
+}
+?>
